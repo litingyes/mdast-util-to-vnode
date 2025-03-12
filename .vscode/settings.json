@@ -7,6 +7,7 @@
     "mdast",
     "preid",
     "unplugin",
+    "usexx",
     "vnode"
   ],
   // Disable the default formatter, use eslint instead
