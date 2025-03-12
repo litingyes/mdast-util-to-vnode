@@ -4,8 +4,10 @@
     "bumpp",
     "changelogithub",
     "commitlint",
+    "mdast",
     "preid",
-    "unplugin"
+    "unplugin",
+    "vnode"
   ],
   // Disable the default formatter, use eslint instead
   "prettier.enable": false,
