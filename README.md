@@ -92,7 +92,11 @@ This package exports the identifier `toVNode`. There is no default export.
 Support passing in custom Vue components to override mdast nodes.
 
 ```ts
-interface ToVNodeOptions {
-  components?: Partial<Record<Nodes['type'], Component>>
+export type ComponentReturn = [Component, Record<string, any> | undefined]
+
+export interface ToVNodeOptions {
+  components?: Partial<Record<Nodes['type'], Component |
+  ComponentReturn |
+  ((node: Node) => ComponentReturn)>>
 }
 ```

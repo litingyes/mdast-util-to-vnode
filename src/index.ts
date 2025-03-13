@@ -20,6 +20,9 @@ import type {
   VNode,
 } from 'vue'
 import {
+  isArray,
+  isFunction,
+  merge,
   pick,
 } from 'usexx'
 import {
@@ -27,8 +30,12 @@ import {
   Text as VText,
 } from 'vue'
 
+export type ComponentReturn = [Component, Record<string, any> | undefined]
+
 export interface ToVNodeOptions {
-  components?: Partial<Record<Nodes['type'], Component>>
+  components?: Partial<Record<Nodes['type'], Component |
+  ComponentReturn |
+  ((node: Node) => ComponentReturn)>>
 }
 
 export function toVNode(node: Root, options: ToVNodeOptions = {}) {
@@ -36,25 +43,38 @@ export function toVNode(node: Root, options: ToVNodeOptions = {}) {
 }
 
 export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
-  const customComponent = options.components?.[node.type as Nodes['type']]
+  let nodeComponent = options.components?.[node.type as Nodes['type']]
+  let nodeComponentProps: ComponentReturn[1] = {}
+
+  if (isFunction(nodeComponent)) {
+    const [component, props] = (nodeComponent as ((node: Node) => ComponentReturn))(node)
+    nodeComponent = component
+    nodeComponentProps = props ?? {}
+  }
+  else if (isArray(nodeComponent)) {
+    nodeComponentProps = nodeComponent[1] ?? {}
+    nodeComponent = nodeComponent[0]
+  }
 
   switch (node.type as Nodes['type']) {
     case 'blockquote': {
       return h(
-        customComponent ?? 'blockquote',
+        nodeComponent ?? 'blockquote',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'break': {
       return h(
-        customComponent ?? 'br',
+        nodeComponent ?? 'br',
+        nodeComponentProps,
       )
     }
     case 'code': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as Code, ['lang', 'meta', 'value']),
+            nodeComponent,
+            merge(pick(node as Code, ['lang', 'meta', 'value']), nodeComponentProps),
           )
         : h(
             'pre',
@@ -67,21 +87,23 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
     }
     case 'delete': {
       return h(
-        customComponent ?? 's',
+        nodeComponent ?? 's',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'emphasis': {
       return h(
-        customComponent ?? 'em',
+        nodeComponent ?? 'em',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'heading': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as Heading, ['depth']),
+            nodeComponent,
+            merge(pick(node as Heading, ['depth']), nodeComponentProps),
           )
         : h(
             `h${(node as Heading).depth}`,
@@ -89,10 +111,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'html': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as Html, ['value']),
+            nodeComponent,
+            merge(pick(node as Html, ['value']), nodeComponentProps),
           )
         : h(
             'div',
@@ -102,10 +124,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'image': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as Image, ['url', 'alt', 'title']),
+            nodeComponent,
+            merge(pick(node as Image, ['url', 'alt', 'title']), nodeComponentProps),
           )
         : h(
             'img',
@@ -117,10 +139,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'inlineCode': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as InlineCode, ['value']),
+            nodeComponent,
+            merge(pick(node as InlineCode, ['value']), nodeComponentProps),
           )
         : h(
             'code',
@@ -128,10 +150,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'link': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as Link, ['url', 'title']),
+            nodeComponent,
+            merge(pick(node as Link, ['url', 'title']), nodeComponentProps),
             createVNodes(node as Parent),
           )
         : h(
@@ -143,10 +165,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'list': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as List, ['ordered', 'spread', 'start']),
+            nodeComponent,
+            merge(pick(node as List, ['ordered', 'spread', 'start']), nodeComponentProps),
             createVNodes(node as Parent),
           )
         : h(
@@ -155,10 +177,10 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
     }
     case 'listItem': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            pick(node as ListItem, ['checked', 'spread']),
+            nodeComponent,
+            merge(pick(node as ListItem, ['checked', 'spread']), nodeComponentProps),
             createVNodes(node as Parent),
           )
         : h(
@@ -168,38 +190,43 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
     }
     case 'paragraph': {
       return h(
-        customComponent ?? 'p',
+        nodeComponent ?? 'p',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'root': {
       return h(
-        customComponent ?? 'div',
+        nodeComponent ?? 'div',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'strong': {
       return h(
-        customComponent ?? 'strong',
+        nodeComponent ?? 'strong',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'table': {
       return h(
-        customComponent ?? 'table',
-        pick(node as Table, ['align']),
+        nodeComponent ?? 'table',
+        merge(pick(node as Table, ['align']), nodeComponentProps),
         createVNodes(node as Parent),
       )
     }
     case 'tableCell': {
       return h(
-        customComponent ?? 'td',
+        nodeComponent ?? 'td',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
     case 'tableRow': {
       return h(
-        customComponent ?? 'th',
+        nodeComponent ?? 'th',
+        nodeComponentProps,
         createVNodes(node as Parent),
       )
     }
@@ -211,17 +238,21 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
     }
     case 'thematicBreak': {
       return h(
-        customComponent ?? 'hr',
+        nodeComponent ?? 'hr',
+        nodeComponentProps,
       )
     }
     case 'yaml': {
-      return customComponent
+      return nodeComponent
         ? h(
-            customComponent,
-            {
-              lang: 'yaml',
-              value: (node as Yaml).value,
-            },
+            nodeComponent,
+            merge(
+              {
+                lang: 'yaml',
+                value: (node as Yaml).value,
+              },
+              nodeComponentProps,
+            ),
           )
         : h(
             'pre',
