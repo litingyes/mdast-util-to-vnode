@@ -38,10 +38,10 @@ export interface ToVNodeOptions {
 }
 
 export function toVNode(node: Root, options: ToVNodeOptions = {}) {
-  return createVNode(node, options)
+  return createVNode(node, options, 0)
 }
 
-export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
+export function createVNode(node: Node, options: ToVNodeOptions = {}, index?: number): VNode {
   let nodeComponent = options.components?.[node.type as Nodes['type']]
   let nodeComponentProps: Record<string, any> = {}
 
@@ -213,16 +213,18 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
         createVNodes(node as Parent, options),
       )
     }
-    case 'tableCell': {
+    case 'tableRow': {
       return h(
-        nodeComponent ?? 'td',
-        nodeComponentProps,
+        nodeComponent ?? (index === 0 ? 'th' : 'tr'),
+        merge(nodeComponentProps, {
+          index,
+        }),
         createVNodes(node as Parent, options),
       )
     }
-    case 'tableRow': {
+    case 'tableCell': {
       return h(
-        nodeComponent ?? 'th',
+        nodeComponent ?? 'td',
         nodeComponentProps,
         createVNodes(node as Parent, options),
       )
@@ -266,5 +268,5 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
 }
 
 function createVNodes(node: Parent, options: ToVNodeOptions = {}): VNode[] {
-  return node.children?.map(child => createVNode(child, options)) ?? []
+  return node.children?.map((child, i) => createVNode(child, options, i)) ?? []
 }
