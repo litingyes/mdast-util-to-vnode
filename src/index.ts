@@ -30,11 +30,10 @@ import {
   Text as VText,
 } from 'vue'
 
-export type ComponentReturn = [Component, Record<string, any> | undefined]
+export type ComponentReturn = Component | [Component, Record<string, any> | undefined]
 
 export interface ToVNodeOptions {
-  components?: Partial<Record<Nodes['type'], Component |
-  ComponentReturn |
+  components?: Partial<Record<Nodes['type'], ComponentReturn |
   ((node: Node) => ComponentReturn)>>
 }
 
@@ -44,14 +43,12 @@ export function toVNode(node: Root, options: ToVNodeOptions = {}) {
 
 export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
   let nodeComponent = options.components?.[node.type as Nodes['type']]
-  let nodeComponentProps: ComponentReturn[1] = {}
+  let nodeComponentProps: Record<string, any> = {}
 
   if (isFunction(nodeComponent)) {
-    const [component, props] = (nodeComponent as ((node: Node) => ComponentReturn))(node)
-    nodeComponent = component
-    nodeComponentProps = props ?? {}
+    nodeComponent = (nodeComponent as ((node: Node) => ComponentReturn))(node)
   }
-  else if (isArray(nodeComponent)) {
+  if (isArray(nodeComponent)) {
     nodeComponentProps = nodeComponent[1] ?? {}
     nodeComponent = nodeComponent[0]
   }
