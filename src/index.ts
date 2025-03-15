@@ -61,7 +61,7 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
       return h(
         nodeComponent ?? 'blockquote',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'break': {
@@ -89,14 +89,14 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
       return h(
         nodeComponent ?? 's',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'emphasis': {
       return h(
         nodeComponent ?? 'em',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'heading': {
@@ -107,7 +107,7 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
           )
         : h(
             `h${(node as Heading).depth}`,
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
     }
     case 'html': {
@@ -154,14 +154,14 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
         ? h(
             nodeComponent,
             merge(pick(node as Link, ['url', 'title']), nodeComponentProps),
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
         : h(
             'a',
             {
               href: (node as Link).url,
             },
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
     }
     case 'list': {
@@ -169,11 +169,11 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
         ? h(
             nodeComponent,
             merge(pick(node as List, ['ordered', 'spread', 'start']), nodeComponentProps),
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
         : h(
             (node as List).ordered ? 'ol' : 'ul',
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
     }
     case 'listItem': {
@@ -181,53 +181,53 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}): VNode {
         ? h(
             nodeComponent,
             merge(pick(node as ListItem, ['checked', 'spread']), nodeComponentProps),
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
         : h(
             'li',
-            createVNodes(node as Parent),
+            createVNodes(node as Parent, options),
           )
     }
     case 'paragraph': {
       return h(
         nodeComponent ?? 'p',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'root': {
       return h(
         nodeComponent ?? 'div',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'strong': {
       return h(
         nodeComponent ?? 'strong',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'table': {
       return h(
         nodeComponent ?? 'table',
         merge(pick(node as Table, ['align']), nodeComponentProps),
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'tableCell': {
       return h(
         nodeComponent ?? 'td',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'tableRow': {
       return h(
         nodeComponent ?? 'th',
         nodeComponentProps,
-        createVNodes(node as Parent),
+        createVNodes(node as Parent, options),
       )
     }
     case 'text': {
