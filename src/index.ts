@@ -86,8 +86,8 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
         : h(
             'pre',
             {
-              dataLang: (node as Code).lang,
-              dataMeta: (node as Code).meta,
+              'data-lang': (node as Code).lang,
+              'data-meta': (node as Code).meta,
             },
             h('code', (node as Code).value),
           )
@@ -280,7 +280,7 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
         : h(
             'pre',
             {
-              dataLang: 'yaml',
+              'data-lang': 'yaml',
             },
             h('code', (node as Code).value),
           )
