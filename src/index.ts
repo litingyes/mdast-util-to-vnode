@@ -27,6 +27,7 @@ import {
   pick,
 } from 'usexx'
 import {
+  Comment,
   h,
   Text as VText,
 } from 'vue'
@@ -278,7 +279,7 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
           )
     }
     default: {
-      return h(Comment)
+      return h(Comment, JSON.stringify(node))
     }
   }
 }
