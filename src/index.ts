@@ -12,6 +12,7 @@ import type {
   Parent,
   Root,
   Table,
+  TableRow,
   Text,
   Yaml,
 } from 'mdast'
@@ -38,10 +39,18 @@ export interface ToVNodeOptions {
 }
 
 export function toVNode(node: Root, options: ToVNodeOptions = {}) {
-  return createVNode(node, options, 0)
+  return createVNode(node, options, {
+    index: 0,
+    parent: null,
+  })
 }
 
-export function createVNode(node: Node, options: ToVNodeOptions = {}, index?: number): VNode {
+export interface CreateVNodeContext {
+  index: number
+  parent: Node | null
+}
+
+export function createVNode(node: Node, options: ToVNodeOptions = {}, context: CreateVNodeContext): VNode {
   let nodeComponent = options.components?.[node.type as Nodes['type']]
   let nodeComponentProps: Record<string, any> = {}
 
@@ -209,22 +218,29 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, index?: nu
     case 'table': {
       return h(
         nodeComponent ?? 'table',
-        merge(pick(node as Table, ['align']), nodeComponentProps),
+        nodeComponentProps,
         createVNodes(node as Parent, options),
       )
     }
     case 'tableRow': {
-      return h(
-        nodeComponent ?? (index === 0 ? 'th' : 'tr'),
-        merge(nodeComponentProps, {
-          index,
-        }),
-        createVNodes(node as Parent, options),
-      )
+      return nodeComponent
+        ? h(
+            nodeComponent,
+            merge(nodeComponentProps, {
+              index: context.index,
+              align: (context.parent as Table).align?.[context.index] ?? 'left',
+            }),
+            createVNodes(node as Parent, options),
+          )
+        : h('tr', {
+            align: (context.parent as Table).align?.[context.index] ?? 'left',
+          }, createVNodes(node as Parent, options))
     }
     case 'tableCell': {
+      const isHeader = (context.parent as TableRow).position?.start?.offset === 0
+
       return h(
-        nodeComponent ?? 'td',
+        nodeComponent ?? (isHeader ? 'th' : 'td'),
         nodeComponentProps,
         createVNodes(node as Parent, options),
       )
@@ -268,5 +284,8 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, index?: nu
 }
 
 function createVNodes(node: Parent, options: ToVNodeOptions = {}): VNode[] {
-  return node.children?.map((child, i) => createVNode(child, options, i)) ?? []
+  return node.children?.map((child, i) => createVNode(child, options, {
+    index: i,
+    parent: node,
+  })) ?? []
 }
