@@ -160,13 +160,20 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       return nodeComponent
         ? h(
             nodeComponent,
-            merge(pick(node as Link, ['url', 'title']), nodeComponentProps),
+            merge(
+              {
+                target: '_blank',
+              },
+              pick(node as Link, ['url', 'title']),
+              nodeComponentProps,
+            ),
             createVNodes(node as Parent, options),
           )
         : h(
             'a',
             {
               href: (node as Link).url,
+              target: '_blank',
             },
             createVNodes(node as Parent, options),
           )
