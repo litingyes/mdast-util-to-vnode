@@ -8,6 +8,9 @@ This package is a utility that takes [mdast](https://github.com/syntax-tree/mdas
 
 ## When should I use this?
 
+> [!TIP]
+> Vue Markdown: the vue component for render markdown string, and support streaming for AI. [Learn more 👉](https://github.com/litingyes/vue-markdown)
+
 If you want to use Vue.js to render mdast, use it. It is especially useful when you want to render streamed MarkDown strings in AI application development.
 
 ## Install
