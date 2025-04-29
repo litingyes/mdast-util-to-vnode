@@ -286,6 +286,12 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
           )
     }
     default: {
+      if(nodeComponent) {
+        return h(
+          nodeComponent,
+          nodeComponentProps,
+        )
+      }
       return h(Comment, JSON.stringify(node))
     }
   }
