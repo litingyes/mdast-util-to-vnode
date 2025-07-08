@@ -68,7 +68,11 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       return h(
         nodeComponent ?? 'blockquote',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'break': {
@@ -96,14 +100,22 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       return h(
         nodeComponent ?? 's',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'emphasis': {
       return h(
         nodeComponent ?? 'em',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'heading': {
@@ -167,7 +179,9 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
               pick(node as Link, ['url', 'title']),
               nodeComponentProps,
             ),
-            createVNodes(node as Parent, options),
+            {
+              default: () => createVNodes(node as Parent, options),
+            },
           )
         : h(
             'a',
@@ -183,7 +197,9 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
         ? h(
             nodeComponent,
             merge(pick(node as List, ['ordered', 'spread', 'start']), nodeComponentProps),
-            createVNodes(node as Parent, options),
+            {
+              default: () => createVNodes(node as Parent, options),
+            },
           )
         : h(
             (node as List).ordered ? 'ol' : 'ul',
@@ -195,7 +211,9 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
         ? h(
             nodeComponent,
             merge(pick(node as ListItem, ['checked', 'spread']), nodeComponentProps),
-            createVNodes(node as Parent, options),
+            {
+              default: () => createVNodes(node as Parent, options),
+            },
           )
         : h(
             'li',
@@ -206,28 +224,44 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       return h(
         nodeComponent ?? 'p',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'root': {
       return h(
         nodeComponent ?? 'div',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'strong': {
       return h(
         nodeComponent ?? 'strong',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'table': {
       return h(
         nodeComponent ?? 'table',
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'tableRow': {
@@ -238,7 +272,9 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
               index: context.index,
               align: (context.parent as Table).align?.[context.index] ?? 'left',
             }),
-            createVNodes(node as Parent, options),
+            {
+              default: () => createVNodes(node as Parent, options),
+            },
           )
         : h('tr', {
             align: (context.parent as Table).align?.[context.index] ?? 'left',
@@ -250,7 +286,11 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       return h(
         nodeComponent ?? (isHeader ? 'th' : 'td'),
         nodeComponentProps,
-        createVNodes(node as Parent, options),
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
       )
     }
     case 'text': {
