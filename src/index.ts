@@ -136,10 +136,11 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
             merge(pick(node as Html, ['value']), nodeComponentProps),
           )
         : h(
-            'div',
+            'pre',
             {
-              innerHTML: (node as Html).value,
+              'data-lang': 'html',
             },
+            h('code', (node as Html).value),
           )
     }
     case 'image': {
