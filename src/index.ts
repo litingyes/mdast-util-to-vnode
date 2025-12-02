@@ -339,6 +339,17 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
             h('code', (node as Code).value),
           )
     }
+    case 'footnoteReference': {
+      return h(
+        nodeComponent ?? 'sup',
+        nodeComponentProps,
+        nodeComponent
+          ? {
+              default: () => createVNodes(node as Parent, options),
+            }
+          : createVNodes(node as Parent, options),
+      )
+    }
     default: {
       if (nodeComponent) {
         return h(
