@@ -1,5 +1,6 @@
 import type {
   Code,
+  Data,
   Heading,
   Html,
   Image,
@@ -32,6 +33,12 @@ import {
   Text as VText,
 } from 'vue'
 
+declare module 'mdast' {
+  interface Data {
+    vueProps?: Record<string, any>
+  }
+}
+
 export type ComponentReturn = Component | [Component, Record<string, any> | undefined]
 
 export interface ToVNodeOptions {
@@ -53,13 +60,19 @@ export interface CreateVNodeContext {
 
 export function createVNode(node: Node, options: ToVNodeOptions = {}, context: CreateVNodeContext): VNode {
   let nodeComponent = options.components?.[node.type as Nodes['type']]
-  let nodeComponentProps: Record<string, any> = {}
+  let nodeComponentProps: Record<string, any> = {
+    ...(node.data as Data)?.vueProps,
+  }
 
   if (isFunction(nodeComponent)) {
     nodeComponent = (nodeComponent as ((node: Node) => ComponentReturn))(node)
   }
   if (isArray(nodeComponent)) {
-    nodeComponentProps = nodeComponent[1] ?? {}
+    nodeComponentProps = {
+      ...nodeComponentProps,
+      ...nodeComponent[1],
+    }
+
     nodeComponent = nodeComponent[0]
   }
 
