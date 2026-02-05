@@ -19,14 +19,15 @@ import type {
 } from 'mdast'
 import type {
   Component,
+  CSSProperties,
   VNode,
 } from 'vue'
 import {
-  isArray,
   isFunction,
+  isNull,
   merge,
   pick,
-} from 'usexx'
+} from 'es-toolkit'
 import {
   Comment,
   h,
@@ -36,6 +37,7 @@ import {
 declare module 'mdast' {
   interface Data {
     vueProps?: Record<string, any>
+    tableAlign?: AlignType[]
   }
 }
 
@@ -67,7 +69,7 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
   if (isFunction(nodeComponent)) {
     nodeComponent = (nodeComponent as ((node: Node) => ComponentReturn))(node)
   }
-  if (isArray(nodeComponent)) {
+  if (Array.isArray(nodeComponent)) {
     nodeComponentProps = {
       ...nodeComponentProps,
       ...nodeComponent[1],
@@ -189,8 +191,8 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
             merge(
               {
                 target: '_blank',
+                ...pick(node as Link, ['url', 'title']),
               },
-              pick(node as Link, ['url', 'title']),
               nodeComponentProps,
             ),
             {
@@ -279,27 +281,46 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       )
     }
     case 'tableRow': {
-      return nodeComponent
-        ? h(
-            nodeComponent,
-            merge(nodeComponentProps, {
-              index: context.index,
-              align: (context.parent as Table).align?.[context.index] ?? 'left',
-            }),
-            {
+      if (!node.data) {
+        node.data = {} as Data
+      }
+      node.data.tableAlign = (context.parent as Table).align ?? []
+
+      return h(
+        nodeComponent ?? 'tr',
+        nodeComponentProps,
+        nodeComponent
+          ? {
               default: () => createVNodes(node as Parent, options),
-            },
-          )
-        : h('tr', {
-            align: (context.parent as Table).align?.[context.index] ?? 'left',
-          }, createVNodes(node as Parent, options))
+            }
+          : createVNodes(node as Parent, options),
+      )
     }
     case 'tableCell': {
       const isHeader = (context.parent as TableRow).position?.start?.offset === 0
+      const align = (context.parent as TableRow).data?.tableAlign?.[context.index]
+      let textAlign: CSSProperties['text-align']
+
+      if (align === 'left') {
+        textAlign = 'start'
+      }
+      else if (align === 'right') {
+        textAlign = 'end'
+      }
+      else if (isNull(align)) {
+        textAlign = undefined
+      }
+      else {
+        textAlign = align
+      }
 
       return h(
         nodeComponent ?? (isHeader ? 'th' : 'td'),
-        nodeComponentProps,
+        merge(nodeComponentProps, {
+          style: {
+            textAlign,
+          },
+        }),
         nodeComponent
           ? {
               default: () => createVNodes(node as Parent, options),
