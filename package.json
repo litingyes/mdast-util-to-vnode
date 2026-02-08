@@ -1,7 +1,7 @@
 {
   "name": "mdast-util-to-vnode",
   "type": "module",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": false,
   "packageManager": "pnpm@10.28.2",
   "description": "mdast utility to get the vue vnode",
