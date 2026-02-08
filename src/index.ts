@@ -14,6 +14,7 @@ import type {
   Root,
   Table,
   TableRow,
+  TableRowData,
   Text,
   Yaml,
 } from 'mdast'
@@ -37,7 +38,11 @@ import {
 declare module 'mdast' {
   interface Data {
     vueProps?: Record<string, any>
+  }
+
+  interface TableRowData {
     tableAlign?: AlignType[]
+    isHeaderRow?: boolean
   }
 }
 
@@ -282,9 +287,13 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
     }
     case 'tableRow': {
       if (!node.data) {
-        node.data = {} as Data
+        node.data = {} as TableRowData
       }
-      node.data.tableAlign = (context.parent as Table).align ?? []
+
+      const tableRowNode = node as TableRow
+
+      tableRowNode.data!.tableAlign = (context.parent as Table).align ?? []
+      tableRowNode.data!.isHeaderRow = context.index === 0
 
       return h(
         nodeComponent ?? 'tr',
@@ -297,7 +306,8 @@ export function createVNode(node: Node, options: ToVNodeOptions = {}, context: C
       )
     }
     case 'tableCell': {
-      const isHeader = (context.parent as TableRow).position?.start?.offset === 0
+      const isHeader = !!(context.parent as TableRow).data?.isHeaderRow
+
       const align = (context.parent as TableRow).data?.tableAlign?.[context.index]
       let textAlign: CSSProperties['text-align']
 
